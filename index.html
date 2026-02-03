@@ -6,6 +6,7 @@
     <title>SeAH AI Transformation Strategy</title>
     
     <!-- Tailwind CSS -->
+    <!-- 참고: 프로덕션 경고가 콘솔에 뜨지만, 데모/제안서 용도로는 정상 작동하므로 무시하셔도 됩니다. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,12 +23,12 @@
         }
     </script>
 
-    <!-- 1. Polyfill: 리액트 라이브러리들이 브라우저에서 process를 찾을 때 에러 방지 -->
+    <!-- 1. Polyfill: 브라우저 환경 호환성 -->
     <script>
         window.process = { env: { NODE_ENV: 'production' } };
     </script>
 
-    <!-- 2. Import Map: 의존성 버전 및 번들링 옵션(?bundle) 최적화 -->
+    <!-- 2. Import Map: React 및 라이브러리 경로 설정 -->
     <script type="importmap">
     {
         "imports": {
@@ -39,8 +40,8 @@
     }
     </script>
 
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 3. Babel for JSX (버전 7.23.5로 고정하여 오류 해결) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <style>
         body { background-color: #020617; color: white; }
@@ -71,11 +72,10 @@
     <div id="root"></div>
 
     <!-- React Application Logic -->
-    <!-- data-presets="react" 명시 -->
+    <!-- data-type="module"을 사용하여 import 구문 지원 -->
     <script type="text/babel" data-type="module" data-presets="react">
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
-        // Lucide 아이콘 로드 최적화
         import { 
             Database, Network, Search, BrainCircuit, ArrowRight, Layers, 
             FileText, ShieldCheck, Activity, CheckCircle, AlertTriangle, 
@@ -83,14 +83,19 @@
         } from 'lucide-react';
         import { motion, AnimatePresence } from 'framer-motion';
 
-        // --- 에러 핸들링을 위한 안전 장치 ---
+        // --- 에러 핸들링 ---
         window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Error:", message);
             const errorDiv = document.getElementById('error-display');
             const rootDiv = document.getElementById('root');
-            if (errorDiv) {
+            if (errorDiv && rootDiv) {
                 rootDiv.style.display = 'none';
                 errorDiv.style.display = 'block';
-                errorDiv.innerHTML = `<strong>System Error:</strong><br/>${message}<br/><small>Check Console (F12) for details.</small>`;
+                errorDiv.innerHTML = `
+                    <h3 class="font-bold text-lg mb-2">System Error</h3>
+                    <p>${message}</p>
+                    <p class="text-xs mt-2 opacity-70">See console (F12) for details.</p>
+                `;
             }
         };
 
@@ -606,12 +611,7 @@
         };
 
         const root = createRoot(document.getElementById('root'));
-        try {
-            root.render(<App />);
-        } catch (error) {
-            console.error("Render Error:", error);
-            document.getElementById('root').innerHTML = `<div style="color:red; text-align:center; padding:20px;">Render Error: ${error.message}</div>`;
-        }
+        root.render(<App />);
     </script>
 </body>
 </html>
