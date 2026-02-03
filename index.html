@@ -22,37 +22,43 @@
         }
     </script>
 
-    <!-- 1. Polyfill -->
+    <!-- 1. Polyfill: 라이브러리 환경 변수 에러 방지 -->
     <script>
         window.process = { env: { NODE_ENV: 'development' } };
     </script>
 
-    <!-- 2. Import Map (핵심 수정 사항) -->
-    <!-- ?bundle을 제거하고, 모든 라이브러리가 동일한 React 인스턴스를 바라보도록 주소 변경 -->
+    <!-- 2. Import Map (핵심 수정: deps 파라미터로 React 인스턴스 통일) -->
     <script type="importmap">
     {
         "imports": {
             "react": "https://esm.sh/react@18.2.0?dev",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
-            "lucide-react": "https://esm.sh/lucide-react@0.300.0?dev",
-            "framer-motion": "https://esm.sh/framer-motion@10.16.4?dev"
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev&deps=react@18.2.0",
+            "lucide-react": "https://esm.sh/lucide-react@0.300.0?dev&deps=react@18.2.0",
+            "framer-motion": "https://esm.sh/framer-motion@10.16.4?dev&deps=react@18.2.0,react-dom@18.2.0"
         }
     }
     </script>
 
-    <!-- 3. Babel (7.23.5 버전 고정) -->
+    <!-- 3. Babel (7.23.5 안정화 버전) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <style>
         body { background-color: #020617; color: white; }
+        /* 로딩 스타일 */
         #root:empty::before {
-            content: 'Initializing System...';
+            content: 'Loading Visualization System...';
             display: block;
             text-align: center;
             padding-top: 50px;
             color: #64748b;
             font-family: monospace;
+            animation: pulse 1.5s infinite;
         }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        /* 에러 디스플레이 */
         #error-display {
             display: none;
             color: #ef4444;
@@ -62,6 +68,8 @@
             margin: 20px;
             border-radius: 8px;
             background: rgba(239, 68, 68, 0.1);
+            font-family: monospace;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -80,7 +88,7 @@
         } from 'lucide-react';
         import { motion, AnimatePresence } from 'framer-motion';
 
-        // Error Handling
+        // --- Global Error Handling ---
         window.onerror = function(message, source, lineno, colno, error) {
             console.error("Global Error:", error);
             const errorDiv = document.getElementById('error-display');
@@ -88,11 +96,7 @@
             if (errorDiv && rootDiv) {
                 rootDiv.style.display = 'none';
                 errorDiv.style.display = 'block';
-                errorDiv.innerHTML = `
-                    <h3 class="font-bold text-lg mb-2">System Error</h3>
-                    <p>${message}</p>
-                    <p class="text-xs mt-2 opacity-70">See console (F12) for details.</p>
-                `;
+                errorDiv.innerHTML = `<strong>System Error:</strong>\n${message}\n\nPlease refresh the page.`;
             }
         };
 
