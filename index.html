@@ -6,7 +6,6 @@
     <title>SeAH AI Transformation Strategy</title>
     
     <!-- Tailwind CSS -->
-    <!-- 참고: 프로덕션 경고가 콘솔에 뜨지만, 데모/제안서 용도로는 정상 작동하므로 무시하셔도 됩니다. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,38 +22,37 @@
         }
     </script>
 
-    <!-- 1. Polyfill: 브라우저 환경 호환성 -->
+    <!-- 1. Polyfill -->
     <script>
-        window.process = { env: { NODE_ENV: 'production' } };
+        window.process = { env: { NODE_ENV: 'development' } };
     </script>
 
-    <!-- 2. Import Map: React 및 라이브러리 경로 설정 -->
+    <!-- 2. Import Map (핵심 수정 사항) -->
+    <!-- ?bundle을 제거하고, 모든 라이브러리가 동일한 React 인스턴스를 바라보도록 주소 변경 -->
     <script type="importmap">
     {
         "imports": {
-            "react": "https://esm.sh/react@18.2.0?bundle",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?bundle",
-            "lucide-react": "https://esm.sh/lucide-react@0.300.0?deps=react@18.2.0&bundle",
-            "framer-motion": "https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0,react-dom@18.2.0&bundle"
+            "react": "https://esm.sh/react@18.2.0?dev",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+            "lucide-react": "https://esm.sh/lucide-react@0.300.0?dev",
+            "framer-motion": "https://esm.sh/framer-motion@10.16.4?dev"
         }
     }
     </script>
 
-    <!-- 3. Babel for JSX (버전 7.23.5로 고정하여 오류 해결) -->
+    <!-- 3. Babel (7.23.5 버전 고정) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <style>
         body { background-color: #020617; color: white; }
-        /* 로딩 중 스타일 */
         #root:empty::before {
-            content: 'Loading system...';
+            content: 'Initializing System...';
             display: block;
             text-align: center;
             padding-top: 50px;
             color: #64748b;
             font-family: monospace;
         }
-        /* 에러 발생 시 표시할 스타일 */
         #error-display {
             display: none;
             color: #ef4444;
@@ -72,7 +70,6 @@
     <div id="root"></div>
 
     <!-- React Application Logic -->
-    <!-- data-type="module"을 사용하여 import 구문 지원 -->
     <script type="text/babel" data-type="module" data-presets="react">
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
@@ -83,9 +80,9 @@
         } from 'lucide-react';
         import { motion, AnimatePresence } from 'framer-motion';
 
-        // --- 에러 핸들링 ---
+        // Error Handling
         window.onerror = function(message, source, lineno, colno, error) {
-            console.error("Global Error:", message);
+            console.error("Global Error:", error);
             const errorDiv = document.getElementById('error-display');
             const rootDiv = document.getElementById('root');
             if (errorDiv && rootDiv) {
